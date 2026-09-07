@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ritual | Daily habits</title>
+    <style>
+        :root { --ink: #17201c; --muted: #66736d; --paper: #f5f7f2; --panel: #fff; --line: #dce5dd; --accent: #247b5a; --accent-soft: #e0f0e7; --warm: #e5a14b; --danger: #c95f55; }
+        [data-theme="dark"] { --ink: #edf5ed; --muted: #a3b3a8; --paper: #14201b; --panel: #1d2b24; --line: #33483c; --accent: #80d1a2; --accent-soft: #244536; --warm: #e9b667; --danger: #ef887c; }
+        * { box-sizing: border-box; }
+        body { margin: 0; min-height: 100vh; color: var(--ink); background: radial-gradient(circle at 85% 0%, var(--accent-soft), transparent 32rem), var(--paper); font-family: Georgia, 'Times New Roman', serif; transition: background .25s, color .25s; }
+        .shell { width: min(1080px, calc(100% - 40px)); margin: 0 auto; padding: 36px 0 60px; }
+        header { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; margin-bottom: 42px; }
+        .eyebrow { color: var(--accent); font: 700 12px/1.2 Arial, sans-serif; letter-spacing: .14em; text-transform: uppercase; }
+        h1 { margin: 8px 0 0; font-size: clamp(38px, 7vw, 68px); line-height: .95; letter-spacing: -.04em; }
+        h2 { margin: 0; font-size: 24px; }
+        p { color: var(--muted); line-height: 1.5; }
+        .icon-button, button { border: 0; cursor: pointer; font: 700 14px Arial, sans-serif; transition: transform .15s, opacity .15s, background .15s; }
+        button:hover { transform: translateY(-1px); } button:disabled { cursor: wait; opacity: .6; transform: none; }
+        .icon-button { width: 42px; height: 42px; border-radius: 50%; background: var(--panel); color: var(--ink); box-shadow: 0 5px 18px #16382b18; font-size: 18px; }
+        .layout { display: grid; grid-template-columns: 320px 1fr; gap: 24px; align-items: start; }
+        .panel { background: color-mix(in srgb, var(--panel) 93%, transparent); border: 1px solid var(--line); border-radius: 18px; padding: 25px; box-shadow: 0 12px 32px #16382b0d; }
+        .panel > p { margin: 8px 0 24px; font: 14px/1.5 Arial, sans-serif; }
+        label { display: block; margin: 18px 0 7px; color: var(--muted); font: 700 11px Arial, sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+        input, select { width: 100%; padding: 13px 14px; border: 1px solid var(--line); border-radius: 10px; outline: 0; background: var(--paper); color: var(--ink); font: 16px Georgia, serif; }
+        input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+        .primary { width: 100%; margin-top: 22px; padding: 14px 18px; border-radius: 10px; background: var(--accent); color: white; }
+        .summary { display: flex; justify-content: space-between; align-items: end; margin-bottom: 20px; }
+        .summary p { margin: 7px 0 0; font: 14px Arial, sans-serif; }
+        #count { color: var(--accent); font: 700 38px Georgia, serif; }
+        #habit-list { display: grid; gap: 10px; }
+        .habit-item { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 17px; border: 1px solid var(--line); border-radius: 13px; background: var(--panel); animation: rise .25s ease both; }
+        .habit-name { margin: 0 0 7px; font-size: 19px; }
+        .meta { color: var(--muted); font: 12px Arial, sans-serif; }
+        .badge, .status { display: inline-block; padding: 5px 8px; border-radius: 99px; background: var(--accent-soft); color: var(--accent); font: 700 11px Arial, sans-serif; }
+        .status { margin-left: 7px; background: transparent; color: var(--muted); }
+        .status.done { color: var(--accent); } .status.skipped { color: var(--warm); } .status.missed { color: var(--danger); }
+        .habit-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: end; }
+        .habit-actions button { padding: 9px 11px; border-radius: 8px; color: var(--ink); background: var(--paper); font-size: 12px; }
+        .habit-actions .selected { background: var(--accent); color: white; }
+        .history { margin-top: 17px; padding-top: 14px; border-top: 1px solid var(--line); }
+        .history-heading { display: flex; justify-content: space-between; margin-bottom: 9px; color: var(--muted); font: 11px Arial, sans-serif; text-transform: uppercase; letter-spacing: .08em; }
+        .history-grid { display: grid; grid-template-columns: repeat(30, minmax(6px, 1fr)); gap: 3px; }
+        .day { aspect-ratio: 1; min-width: 6px; border-radius: 3px; background: var(--paper); border: 1px solid var(--line); }
+        .day.done { border-color: var(--accent); background: var(--accent); }
+        .day.skipped { border-color: var(--warm); background: var(--warm); }
+        .day.missed { border-color: var(--danger); background: var(--danger); }
+        .day.today { outline: 2px solid var(--ink); outline-offset: 2px; }
+        .empty, .error { padding: 36px 20px; border: 1px dashed var(--line); border-radius: 13px; text-align: center; font: 14px Arial, sans-serif; }
+        .error { color: var(--danger); }
+        @keyframes rise { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: none; } }
+        @media (max-width: 760px) { .shell { width: min(100% - 28px, 560px); padding-top: 24px; } header { margin-bottom: 30px; } .layout { grid-template-columns: 1fr; } .panel { padding: 20px; } .habit-item { align-items: flex-start; flex-direction: column; } .habit-actions { justify-content: start; } }
+    </style>
+</head>
+<body>
+    <main class="shell">
+        <header><div><div class="eyebrow">A quieter way to improve</div><h1>Make it<br>repeatable.</h1></div><button class="icon-button" id="theme-button" aria-label="Toggle color theme">☾</button></header>
+        <div class="layout">
+            <section class="panel"><h2>Start a ritual</h2><p>Small actions become meaningful when they have a place in your day.</p><form id="habit-form"><label for="h-name">Habit name</label><input id="h-name" maxlength="80" placeholder="Read 10 pages" required><label for="h-category">Category</label><select id="h-category"><option>Health</option><option>Study</option><option>Career</option><option>Personal</option></select><button class="primary" type="submit">Add habit</button></form></section>
+            <section class="panel"><div class="summary"><div><h2>Today</h2><p id="date-label">Your daily practice</p></div><span id="count">0/0</span></div><div id="habit-list" aria-live="polite"><div class="empty">Loading your habits...</div></div></section>
+        </div>
+    </main>
+    <script>
+        const API_URL = '/api/habits';
+        const list = document.getElementById('habit-list');
+        const count = document.getElementById('count');
+        document.getElementById('date-label').textContent = new Intl.DateTimeFormat(undefined, { weekday: 'long', month: 'long', day: 'numeric' }).format(new Date());
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') document.body.dataset.theme = 'dark';
+        document.getElementById('theme-button').addEventListener('click', () => { const dark = document.body.dataset.theme !== 'dark'; document.body.dataset.theme = dark ? 'dark' : 'light'; localStorage.setItem('theme', dark ? 'dark' : 'light'); });
+        async function request(url, options) { const response = await fetch(url, options); if (!response.ok) { const data = await response.json().catch(() => ({})); throw new Error(data.detail || 'Something went wrong.'); } return response.json(); }
+        async function fetchHabits() {
+            try { const habits = await request(API_URL); const done = habits.filter(h => h.today_status === 'Done').length; count.textContent = `${done}/${habits.length}`; list.innerHTML = habits.length ? '' : '<div class="empty">No rituals yet. Add one on the left and begin.</div>'; habits.forEach((habit, index) => { const item = document.createElement('article'); item.className = 'habit-item'; item.style.animationDelay = `${index * 45}ms`; const safeName = document.createElement('span'); safeName.textContent = habit.name; const completed = habit.history.filter(day => day.status === 'Done').length; const history = habit.history.map(day => { const date = new Date(`${day.date}T00:00:00`); const label = date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }); const today = day.date === new Date().toISOString().slice(0, 10); return `<span class="day ${day.status.toLowerCase()} ${today ? 'today' : ''}" title="${label}: ${day.status}"></span>`; }).join(''); item.innerHTML = `<div style="width:100%"><h3 class="habit-name"></h3><span class="badge">${habit.category}</span><span class="status ${habit.today_status.toLowerCase()}">${habit.today_status}</span><div class="history"><div class="history-heading"><span>Last 30 days</span><span>${completed}/30 complete</span></div><div class="history-grid">${history}</div></div></div><div class="habit-actions"><button data-status="Done">Done</button><button data-status="Skipped">Skip</button><button data-status="Missed">Miss</button></div>`; item.querySelector('.habit-name').append(safeName); item.querySelectorAll('button').forEach(button => { if (habit.today_status === button.dataset.status) button.classList.add('selected'); button.addEventListener('click', () => logHabit(habit.id, button.dataset.status)); }); list.append(item); }); } catch (error) { list.innerHTML = `<div class="error">${error.message} <button class="primary" onclick="fetchHabits()">Try again</button></div>`; }
+        }
+        async function logHabit(id, status) { try { await request(`${API_URL}/${id}/log`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) }); await fetchHabits(); } catch (error) { list.innerHTML = `<div class="error">${error.message}</div>`; } }
+        document.getElementById('habit-form').addEventListener('submit', async event => { event.preventDefault(); const input = document.getElementById('h-name'); const button = event.target.querySelector('button'); button.disabled = true; try { await request(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: input.value.trim(), category: document.getElementById('h-category').value, description: '', recurrence: 'daily' }) }); input.value = ''; await fetchHabits(); } catch (error) { alert(error.message); } finally { button.disabled = false; } });
+        fetchHabits();
+    </script>
+</body>
+</html>
