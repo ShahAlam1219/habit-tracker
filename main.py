@@ -73,14 +73,27 @@ def get_habits():
     cursor.execute("SELECT * FROM habits")
     habits = [dict(row) for row in cursor.fetchall()]
     
-    # Fetch today's logs to append status
-    today = datetime.date.today().isoformat()
-    cursor.execute("SELECT habit_id, status FROM habit_logs WHERE log_date = ?", (today,))
-    logs = {row["habit_id"]: row["status"] for row in cursor.fetchall()}
+    today = datetime.date.today()
+    first_day = today - datetime.timedelta(days=29)
+    cursor.execute(
+        "SELECT habit_id, log_date, status FROM habit_logs WHERE log_date BETWEEN ? AND ?",
+        (first_day.isoformat(), today.isoformat()),
+    )
+    logs = {(row["habit_id"], row["log_date"]): row["status"] for row in cursor.fetchall()}
     conn.close()
 
     for habit in habits:
-        habit["today_status"] = logs.get(habit["id"], "Pending")
+        habit["today_status"] = logs.get((habit["id"], today.isoformat()), "Pending")
+        habit["history"] = [
+            {
+                "date": (first_day + datetime.timedelta(days=day)).isoformat(),
+                "status": logs.get(
+                    (habit["id"], (first_day + datetime.timedelta(days=day)).isoformat()),
+                    "Pending",
+                ),
+            }
+            for day in range(30)
+        ]
         
     return habits
 
